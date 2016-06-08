@@ -1,5 +1,8 @@
 package org.axe.hoke.bean;
 
+import java.lang.reflect.Method;
+
+import org.axe.hoke.helper.HokeStorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -12,11 +15,14 @@ import net.sf.cglib.proxy.MethodProxy;
 public class HokeDataPackage {
 	private Logger LOGGER = LoggerFactory.getLogger(HokeDataPackage.class);
 	
+	private String poolKey;
+	
 	/**
 	 * 反射用
 	 */
 	private Object obj;
 	private Object[] params;
+	private Method method;
     private MethodProxy methodProxy;
 	
 	/**
@@ -28,73 +34,69 @@ public class HokeDataPackage {
 	 */
 	private long timeOut;
 	/**
-	 * 更新时间
+	 * 更新到磁盘的时间
 	 */
-	private long time;
+	private long flushDiskTime = 0;
 	/**
-	 * 缓存文件
+	 * 数据从磁盘到内存的时间
 	 */
-	private String cacheFile;
+	private long flushMemTime = 0;
 	
-	public HokeDataPackage(Object obj, Object[] params, MethodProxy methodProxy, long timeOut, long time,
-			String cacheFile) {
+	public HokeDataPackage(
+			String poolKey, 
+			Object obj, 
+			Object[] params, 
+			Method method, 
+			MethodProxy methodProxy, 
+			long timeOut) {
+		this.poolKey = poolKey;
 		this.obj = obj;
 		this.params = params;
+		this.method = method;
 		this.methodProxy = methodProxy;
 		this.timeOut = timeOut;
-		this.time = time;
-		this.cacheFile = cacheFile;
 	}
 	
 	/**
 	 * 主要方法
 	 * 刷新单体Hoke数据
-	 * TODO:如果有缓存策略，根据策略保存缓存数据
 	 */
-	public void refreshData() {
+	public void flushData() {
 		try {
-			this.data = methodProxy.invokeSuper(obj, params);
-			this.time = System.currentTimeMillis();
+			Object data = methodProxy.invokeSuper(obj, params);
+			HokeStorageHelper.saveData(poolKey, data);
+			this.flushDiskTime = System.currentTimeMillis();
 		} catch (Throwable e) {
 			e.printStackTrace();
 			LOGGER.error("refresh data failed",e);
 		}
 	}
 
-	/**
-	 * 主要方法
-	 * 返回单体数据
-	 * TODO:如果是空的，从缓存文件更新数据
-	 */
-	public Object getObj() {
-		return obj;
-	}
-
-	public Object[] getParams() {
-		return params;
-	}
 	
-	public MethodProxy getMethodProxy() {
-		return methodProxy;
-	}
-
 	public Object getData() {
-		return data;
+		if(this.data == null){
+			this.data = HokeStorageHelper.getData(poolKey, method.getReturnType());
+			if(data != null){
+				//记录数据从磁盘拉取的时间
+				this.flushMemTime = System.currentTimeMillis();
+			}
+		}
+		return this.data;
 	}
 
-	public long getTimeOut() {
-		return timeOut;
+	public long getFlushDiskTimeOutTime(){
+		return this.timeOut*1000+this.flushDiskTime;
 	}
 
-	public long getTime() {
-		return time;
-	}
-
-	public String getCacheFile() {
-		return cacheFile;
+	public long getFlushMemTimeOutTime(){
+		return this.timeOut*1000+this.flushMemTime;
 	}
 	
-	public long getTimeOutTime(){
-		return getTimeOut()*1000+getTime();
+	public void clearData(){
+		this.data = null;
+	}
+	
+	public boolean isNotEmpty(){
+		return this.data != null;
 	}
 }

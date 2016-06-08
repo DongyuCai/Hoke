@@ -25,16 +25,10 @@ public @interface HokeConfig {
 	boolean lazy() default false;
 	
 	/**
-	 * 异步数据同步间隔时间
-	 * 这是个超时阈值（读yu zhi :)）
-	 * 默认0，HokeThread会不停更新这个调用
+	 * 异步数据同步间隔时间，
+	 * 单位是秒，
+	 * 这是个超时阈值（读yu zhi :)），
+	 * 默认0，HokeThread会不停更新这个调用。
 	 */
 	long timeOut() default 0;
-	
-	/**
-	 * 数据缓存策略
-	 * 默认使用内存存储
-	 * (内存方案不代表不会使用到磁盘，内存方案会建立默认文件夹与缓存文件，缓存仅仅用于框架重启时候的数据重建)
-	 */
-	String cacheFile() default "";
 }
