@@ -15,6 +15,9 @@ import net.sf.cglib.proxy.MethodProxy;
 public class HokeDataPackage {
 	private Logger LOGGER = LoggerFactory.getLogger(HokeDataPackage.class);
 	
+	/**
+	 * Hoke POOL中存放的key
+	 */
 	private String poolKey;
 	
 	/**
@@ -24,15 +27,19 @@ public class HokeDataPackage {
 	private Object[] params;
 	private Method method;
     private MethodProxy methodProxy;
-	
-	/**
-	 * 执行结果
-	 */
-	private Object data;
 	/**
 	 * 超时时间
 	 */
 	private long timeOut;
+	
+	/**
+	 * 执行结果
+	 */
+	private Object data = null;
+	/**
+	 * 执行异常
+	 */
+	private Throwable throwable = null;
 	/**
 	 * 更新到磁盘的时间
 	 */
@@ -66,14 +73,19 @@ public class HokeDataPackage {
 			Object data = methodProxy.invokeSuper(obj, params);
 			HokeStorageHelper.saveData(poolKey, data);
 			this.flushDiskTime = System.currentTimeMillis();
+			this.throwable = null;
 		} catch (Throwable e) {
+			this.throwable = e;
 			e.printStackTrace();
 			LOGGER.error("refresh data failed",e);
 		}
 	}
 
 	
-	public Object getData() {
+	public Object getData() throws Throwable {
+		if(this.throwable != null){
+			throw throwable;
+		}
 		if(this.data == null){
 			this.data = HokeStorageHelper.getData(poolKey, method.getReturnType());
 			if(data != null){

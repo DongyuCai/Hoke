@@ -35,7 +35,7 @@ public final class HokePool {
 		POOL_TASK_QUEE = new ArrayList<>();
 	}
 
-	public static Object getData(Object obj, Method method, Object[] params, MethodProxy methodProxy) {
+	public static Object getData(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
 		// #根据参数，计算出数据存放的key
 		String poolKey = generatePoolKey(method, params);
 		Object data = POOL.get(poolKey);
@@ -72,12 +72,7 @@ public final class HokePool {
 			// #缓存无法提供，如果还不支持异步加载，那就强制获取
 			HokeConfig annotation = method.getAnnotation(HokeConfig.class);
 			if (!annotation.lazy()) {
-				try {
-					data = methodProxy.invokeSuper(obj, params);
-				} catch (Throwable e) {
-					e.printStackTrace();
-					LOGGER.error("force get data failed", e);
-				}
+				data = methodProxy.invokeSuper(obj, params);
 			}
 
 		}
