@@ -35,30 +35,17 @@ public final class HokePool {
 		POOL_TASK_QUEE = new ArrayList<>();
 	}
 
+	public static Map<String, HokeDataPackage> getPool() {
+		return POOL;
+	}
+	
 	public static Object getData(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
 		// #根据参数，计算出数据存放的key
 		String poolKey = generatePoolKey(method, params);
-		Object data = POOL.get(poolKey);
-		if (data == null) {
-			HokeConfig config = method.getAnnotation(HokeConfig.class);
-			long start = 0;
-			if (LOGGER.isInfoEnabled()) {
-				start = System.currentTimeMillis();
-				LOGGER.info("Hoke add task try");
-			}
-			synchronized (POOL_TASK_QUEE) {
-				if (LOGGER.isInfoEnabled()) {
-					long end = System.currentTimeMillis() - start;
-					LOGGER.info("Hoke add task start " + end + "ms");
-				}
-				POOL_TASK_QUEE.add(new KeyValue<String, HokeDataPackage>(poolKey,
-						new HokeDataPackage(poolKey, obj, params, method, methodProxy, config.timeOut())));
-			}
-			if (LOGGER.isInfoEnabled()) {
-				long end = System.currentTimeMillis() - start;
-				LOGGER.info("Hoke add task finished " + end + "ms");
-			}
-
+		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
+		if (hokeDataPackage == null) {
+			
+			addTask2Quee(poolKey, method, obj, params, methodProxy);
 			/*
 			 * synchronized (POOL) { try { if(POOL.containsKey(poolKey)){ data =
 			 * POOL.get(poolKey); }else{ //放着，等HokeThread更新 HokeConfig config =
@@ -69,15 +56,47 @@ public final class HokePool {
 			 * }
 			 */
 
-			// #缓存无法提供，如果还不支持异步加载，那就强制获取
-			HokeConfig annotation = method.getAnnotation(HokeConfig.class);
-			if (!annotation.lazy()) {
-				data = methodProxy.invokeSuper(obj, params);
+			
+			return getNativeData(method, obj, params, methodProxy);
+		}else{
+			Object data = hokeDataPackage.getData();
+			if(data == null){
+				return getNativeData(method, obj, params, methodProxy);
+			}else{
+				return data;
 			}
-
 		}
-
-		return data != null && data instanceof HokeDataPackage ? ((HokeDataPackage) data).getData() : data;
+	}
+	
+	private static Object getNativeData(Method method, Object obj, Object[] params, MethodProxy methodProxy) throws Throwable{
+		// #缓存无法提供，如果还不支持异步加载，那就强制获取
+		HokeConfig annotation = method.getAnnotation(HokeConfig.class);
+		if (!annotation.lazy()) {
+			return methodProxy.invokeSuper(obj, params);
+		}else{
+			return null;
+		}
+	}
+	
+	private static void addTask2Quee(String poolKey, Method method, Object obj, Object[] params, MethodProxy methodProxy){
+		HokeConfig config = method.getAnnotation(HokeConfig.class);
+		long start = 0;
+		if (LOGGER.isInfoEnabled()) {
+			start = System.currentTimeMillis();
+			LOGGER.info("Hoke add task try");
+		}
+		synchronized (POOL_TASK_QUEE) {
+			if (LOGGER.isInfoEnabled()) {
+				long end = System.currentTimeMillis() - start;
+				LOGGER.info("Hoke add task start " + end + "ms");
+			}
+			POOL_TASK_QUEE.add(new KeyValue<String, HokeDataPackage>(poolKey,
+					new HokeDataPackage(poolKey, obj, params, method, methodProxy, config.timeOut())));
+		}
+		if (LOGGER.isInfoEnabled()) {
+			long end = System.currentTimeMillis() - start;
+			LOGGER.info("Hoke add task finished " + end + "ms");
+		}
 	}
 
 	/**
@@ -123,8 +142,6 @@ public final class HokePool {
 	 */
 	public static void flushPool() {
 		try {
-			// #有data数据的个数
-			int dataNum = 0;
 
 			long start = 0;
 			if (LOGGER.isInfoEnabled()) {
@@ -138,31 +155,38 @@ public final class HokePool {
 				}
 
 				// #刷数据
+				
+				//#刷新POOL总共耗时
+				long takeTime = 0;
+				// #有data数据的个数
 				// TODO:这里是单线程刷新所有数据，有待改成数据线程一对一
+				int dataNum = 0;
 				for (Map.Entry<String, HokeDataPackage> entry : POOL.entrySet()) {
-					HokeDataPackage dataPackage = entry.getValue();
+					HokeDataPackage hokeDataPackage = entry.getValue();
 					long now = System.currentTimeMillis();
 					// #内存数据超时判断
-					if (dataPackage.getFlushMemTimeOutTime() < now) {
-						dataPackage.clearData();
+					if (hokeDataPackage.getFlushMemTimeOutTime() < now) {
+						hokeDataPackage.clearData();
 					}
 					// #磁盘数据超时判断
-					if (dataPackage.getFlushDiskTimeOutTime() < now) {
-						dataPackage.flushData();
+					if (hokeDataPackage.getFlushDiskTimeOutTime() < now) {
+						hokeDataPackage.flushData();
 					}
-					if (dataPackage.isNotEmpty()) {
-						dataNum++;// 有数据的，记录下个数
-					}
-					if (LOGGER.isDebugEnabled()) {
-						now = System.currentTimeMillis() - now;
-						LOGGER.debug("Hoke flush [" + entry.getKey() + "] " + (now) + "ms");
+					if (LOGGER.isInfoEnabled()) {
+						LOGGER.info("Hoke flush [" + hokeDataPackage.getPoolKey() + "] " + (hokeDataPackage.getTakeTime()) + "ms");
+						
+						takeTime = takeTime+hokeDataPackage.getTakeTime();
+						
+						if (!hokeDataPackage.isEmpty()) {
+							dataNum++;// 有数据的，记录下个数
+						}
+						
 					}
 				}
-			}
-			if (LOGGER.isInfoEnabled()) {
-				long end = System.currentTimeMillis() - start;
-				LOGGER.info(
-						"Hoke flush pool finished " + end + "ms, pool size=" + POOL.size() + ", data size=" + dataNum);
+				if (LOGGER.isInfoEnabled()) {
+					LOGGER.info(
+							"Hoke flush pool finished " + takeTime + "ms, pool size=" + POOL.size() + ", data size=" + dataNum);
+				}
 			}
 		} catch (Exception e) {
 			e.printStackTrace();

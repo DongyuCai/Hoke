@@ -48,6 +48,11 @@ public class HokeDataPackage {
 	 * 数据从磁盘到内存的时间
 	 */
 	private long flushMemTime = 0;
+	/**
+	 * 统计耗时
+	 * 暂无实际用处，给debug统计用
+	 */
+	private long takeTime = 0;
 	
 	public HokeDataPackage(
 			String poolKey, 
@@ -69,11 +74,18 @@ public class HokeDataPackage {
 	 * 刷新单体Hoke数据
 	 */
 	public void flushData() {
+		long start = 0;
+		if (LOGGER.isInfoEnabled()) {
+			start = System.currentTimeMillis();
+		}
 		try {
 			Object data = methodProxy.invokeSuper(obj, params);
 			HokeStorageHelper.saveData(poolKey, data);
 			this.flushDiskTime = System.currentTimeMillis();
 			this.throwable = null;
+			if (LOGGER.isInfoEnabled()) {
+				this.takeTime = this.flushDiskTime - start;
+			}
 		} catch (Throwable e) {
 			this.throwable = e;
 			e.printStackTrace();
@@ -81,6 +93,9 @@ public class HokeDataPackage {
 		}
 	}
 
+	public String getPoolKey() {
+		return poolKey;
+	}
 	
 	public Object getData() throws Throwable {
 		if(this.throwable != null){
@@ -107,8 +122,16 @@ public class HokeDataPackage {
 	public void clearData(){
 		this.data = null;
 	}
+
+	public long getTakeTime() {
+		return takeTime;
+	}
 	
-	public boolean isNotEmpty(){
-		return this.data != null;
+	public boolean isEmpty(){
+		return this.data == null;
+	}
+
+	public Throwable getThrowable() {
+		return throwable;
 	}
 }

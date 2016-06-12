@@ -1,0 +1,72 @@
+<java>
+@Request(value = "", method = RequestMethod.GET)
+public void home(@RequestParam("token")String token, HttpServletRequest request, HttpServletResponse response) {
+	String contextPath = request.getContextPath();
+	StringBuilder html = new StringBuilder();
+</java>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>hoke homepage</title>
+	<script type="text/javascript">
+		var refreshInt = setInterval("refresh()",1000*60);
+		function refresh(){
+			window.location = ""+contextPath+"/hoke?token="+token+"";
+		}
+	</script>
+</head>
+<body>
+	<table width="100%">
+		<tr><td align="right">
+			<a style="font-size: 15px;color: #AE0000" href=""+contextPath+"/axe?token="+token+""><b>axe</b></a>
+		</td></tr>
+		<tr><td align="center"><font size="28">欢迎使用 Axe Hoke!</font></td></tr>
+		
+		<!--系统运行 概览-->
+		<tr><td><table cellspacing="0px"><tr><td style="background-color: #AE0000">
+		&nbsp;<font color="white"><b>Hoke Pool</b></font>&nbsp;
+		</td></tr></table></td></tr>
+		
+		<tr><td height="2px" style="background-color:#AE0000"></td></tr>
+		<tr><td>
+			<table width="100%">
+				<tr style="background-color: #F0F0F0;">
+					<td align="left">&nbsp;</td>
+					<td align="left"><b>poolKey</b></td>
+					<td align="left"><b>takeTime(ms)</b></td>
+					<td align="left"><b>status</b></td>
+				</tr>
+				<java>
+				for (Map.Entry<String, HokeDataPackage> entry : HokePool.getPool().entrySet()) {
+					HokeDataPackage hokeDataPackage = entry.getValue();
+				</java>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">"+hokeDataPackage.getPoolKey()+"</td>
+					<td align="left">"+hokeDataPackage.getTakeTime()+"</td>
+					<java>
+					if (hokeDataPackage.getThrowable() == null){
+					</java>
+					<td align="left">正常</td>
+					<java>
+					} else {
+					</java>
+					<td align="left">报错</td>
+					<java>
+					}
+					</java>
+				</tr>
+				<java>
+				}	
+				</java>
+			</table>
+		</td></tr><tr><td>&nbsp;</td></tr>
+
+	</table>
+</body>
+</html>
+<java>
+	printHtml(response, html.toString());
+}
+</java>

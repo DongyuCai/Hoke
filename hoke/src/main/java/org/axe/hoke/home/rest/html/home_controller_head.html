@@ -1,0 +1,40 @@
+<java>
+package org.axe.hoke.home.rest;
+
+import java.io.PrintWriter;
+import java.util.Map;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import org.axe.annotation.ioc.Controller;
+import org.axe.annotation.mvc.FilterFuckOff;
+import org.axe.annotation.mvc.Interceptor;
+import org.axe.annotation.mvc.Request;
+import org.axe.annotation.mvc.RequestParam;
+import org.axe.constant.CharacterEncoding;
+import org.axe.constant.ContentType;
+import org.axe.constant.RequestMethod;
+import org.axe.hoke.bean.HokeDataPackage;
+import org.axe.hoke.core.HokePool;
+import org.axe.home.interceptor.HomeInterceptor;
+import org.axe.home.interceptor.SignInInterceptor;
+
+@FilterFuckOff
+@Interceptor({ HomeInterceptor.class, SignInInterceptor.class })
+@Controller(basePath = "/hoke")
+public class HomeController {
+
+	private void printHtml(HttpServletResponse response, String html) {
+		try {
+			response.setCharacterEncoding(CharacterEncoding.UTF_8.CHARACTER_ENCODING);
+			response.setContentType(ContentType.APPLICATION_HTML.CONTENT_TYPE);
+			PrintWriter writer = response.getWriter();
+			writer.write(html);
+			writer.flush();
+			writer.close();
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+</java>
