@@ -33,8 +33,7 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 			<table width="100%">
 				<tr style="background-color: #F0F0F0;">
 					<td align="left">&nbsp;</td>
-					<td align="left"><b>Hoke 总个数</b></td>
-					<td align="left"><b>Hoke 内存个数</b></td>
+					<td align="left"><b>Hoke 个数</b></td>
 					<td align="left"><b>Hoke 总耗时</b></td>
 				</tr>
 				<java>
@@ -81,8 +80,7 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 				</java>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">"+pool.size()+"</td>
-					<td align="left">"+dataNum+"</td>
+					<td align="left">"+dataNum+"/"+pool.size()+"</td>
 					<td align="left">"+runTime+"</td>
 				</tr>
 			</table>
@@ -109,7 +107,7 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 				</java>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">"+hokeDataPackage.getPoolKey()+"</td>
+					<td align="left"><a href=""+contextPath+"/hoke/hoke_data_package?poolKey="+hokeDataPackage.getPoolKey()+"?token="+token+"">"+hokeDataPackage.getPoolKey()+"</a></td>
 					<td align="left">"+hokeDataPackage.getTimeOut()+"</td>
 					<td align="left">"+hokeDataPackage.getTakeTime()+"</td>
 					<td align="left">"+hokeDataPackage.getStatus().desc+"</td>

@@ -73,8 +73,7 @@ html.append("<tr><td>");
 html.append("<table width=\"100%\">");
 html.append("<tr style=\"background-color: #F0F0F0;\">");
 html.append("<td align=\"left\">&nbsp;</td>");
-html.append("<td align=\"left\"><b>Hoke 总个数</b></td>");
-html.append("<td align=\"left\"><b>Hoke 内存个数</b></td>");
+html.append("<td align=\"left\"><b>Hoke 个数</b></td>");
 html.append("<td align=\"left\"><b>Hoke 总耗时</b></td>");
 html.append("</tr>");
 long runTimeMS = 0;
@@ -119,8 +118,7 @@ runTime = runTimeDay + "d" + runTimeHour + "h" + runTimeMin + "m" + runTimeSec +
 }
 html.append("<tr>");
 html.append("<td align=\"left\">&nbsp;</td>");
-html.append("<td align=\"left\">"+pool.size()+"</td>");
-html.append("<td align=\"left\">"+dataNum+"</td>");
+html.append("<td align=\"left\">"+dataNum+"/"+pool.size()+"</td>");
 html.append("<td align=\"left\">"+runTime+"</td>");
 html.append("</tr>");
 html.append("</table>");
@@ -145,7 +143,7 @@ for (Map.Entry<String, HokeDataPackage> entry : HokePool.getPool().entrySet()) {
 HokeDataPackage hokeDataPackage = entry.getValue();
 html.append("<tr>");
 html.append("<td align=\"left\">&nbsp;</td>");
-html.append("<td align=\"left\">"+hokeDataPackage.getPoolKey()+"</td>");
+html.append("<td align=\"left\"><a href=\""+contextPath+"/hoke/hoke_data_package?poolKey="+hokeDataPackage.getPoolKey()+"?token="+token+"\">"+hokeDataPackage.getPoolKey()+"</a></td>");
 html.append("<td align=\"left\">"+hokeDataPackage.getTimeOut()+"</td>");
 html.append("<td align=\"left\">"+hokeDataPackage.getTakeTime()+"</td>");
 html.append("<td align=\"left\">"+hokeDataPackage.getStatus().desc+"</td>");
