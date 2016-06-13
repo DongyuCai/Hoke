@@ -25,6 +25,71 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 		
 		<!--系统运行 概览-->
 		<tr><td><table cellspacing="0px"><tr><td style="background-color: #AE0000">
+		&nbsp;<font color="white"><b>Hoke</b></font>&nbsp;
+		</td></tr></table></td></tr>
+		
+		<tr><td height="2px" style="background-color:#AE0000"></td></tr>
+		<tr><td>
+			<table width="100%">
+				<tr style="background-color: #F0F0F0;">
+					<td align="left">&nbsp;</td>
+					<td align="left"><b>Hoke 总个数</b></td>
+					<td align="left"><b>Hoke 内存个数</b></td>
+					<td align="left"><b>Hoke 总耗时</b></td>
+				</tr>
+				<java>
+				long runTimeMS = 0;
+				Map<String,HokeDataPackage> pool = HokePool.getPool();
+				int dataNum = 0;
+				for (Map.Entry<String, HokeDataPackage> entry : pool.entrySet()) {
+					HokeDataPackage hokeDataPackage = entry.getValue();
+					runTimeMS = runTimeMS + hokeDataPackage.getTakeTime();
+					
+					if (!hokeDataPackage.isEmpty()) {
+						dataNum++;// 有数据的，记录下个数
+					}
+				}
+				
+				String runTime = "";
+				if (runTimeMS < 1000){
+					runTime = runTimeMS + "ms";
+				} else {
+					long runTimeSec = runTimeMS / 1000;
+					if (runTimeSec < 60) {
+						runTime = runTimeSec + "s";
+					} else {
+						long runTimeMin = runTimeSec / 60;
+						if (runTimeMin < 60) {
+							runTimeSec = runTimeSec - (runTimeMin * 60);
+							runTime = runTimeMin + "m" + runTimeSec + "s";
+						} else {
+							long runTimeHour = runTimeMin / 60;
+							if (runTimeHour < 24) {
+								runTimeMin = runTimeMin - runTimeHour * 60;
+								runTimeSec = runTimeSec - ((runTimeHour * 60) + runTimeMin) * 60;
+								runTime = runTimeHour + "h" + runTimeMin + "m" + runTimeSec + "s";
+							} else {
+								long runTimeDay = runTimeHour / 24;
+								runTimeHour = runTimeHour-(runTimeDay * 24);
+								runTimeMin = runTimeMin - ((runTimeDay * 24) + runTimeHour) * 60;
+								runTimeSec = runTimeSec - ((((runTimeDay * 24) + runTimeHour) * 60) + runTimeMin) * 60;
+								runTime = runTimeDay + "d" + runTimeHour + "h" + runTimeMin + "m" + runTimeSec + "s";
+							}
+						}
+					}
+				}
+				</java>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">"+pool.size()+"</td>
+					<td align="left">"+dataNum+"</td>
+					<td align="left">"+runTime+"</td>
+				</tr>
+			</table>
+		</td></tr><tr><td>&nbsp;</td></tr>
+		
+		<!--Hoke POOL-->
+		<tr><td><table cellspacing="0px"><tr><td style="background-color: #AE0000">
 		&nbsp;<font color="white"><b>Hoke Pool</b></font>&nbsp;
 		</td></tr></table></td></tr>
 		
@@ -33,7 +98,8 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 			<table width="100%">
 				<tr style="background-color: #F0F0F0;">
 					<td align="left">&nbsp;</td>
-					<td align="left"><b>poolKey</b></td>
+					<td align="left"><b>Hoke Method</b></td>
+					<td align="left"><b>timeOut(s)</b></td>
 					<td align="left"><b>takeTime(ms)</b></td>
 					<td align="left"><b>status</b></td>
 				</tr>
@@ -44,18 +110,9 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 				<tr>
 					<td align="left">&nbsp;</td>
 					<td align="left">"+hokeDataPackage.getPoolKey()+"</td>
+					<td align="left">"+hokeDataPackage.getTimeOut()+"</td>
 					<td align="left">"+hokeDataPackage.getTakeTime()+"</td>
-					<java>
-					if (hokeDataPackage.getThrowable() == null){
-					</java>
-					<td align="left">正常</td>
-					<java>
-					} else {
-					</java>
-					<td align="left">报错</td>
-					<java>
-					}
-					</java>
+					<td align="left">"+hokeDataPackage.getStatus().desc+"</td>
 				</tr>
 				<java>
 				}	

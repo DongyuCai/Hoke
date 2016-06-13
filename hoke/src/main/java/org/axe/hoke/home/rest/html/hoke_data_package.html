@@ -1,0 +1,137 @@
+<java>
+@Request(value = "/hoke_data_package", method = RequestMethod.GET)
+public void actionDetail(@RequestParam("poolKey") String poolKey, @RequestParam("token")String token, HttpServletRequest request, HttpServletResponse response) {
+	String contextPath = request.getContextPath();
+	do {
+		if (StringUtil.isEmpty(poolKey)) break;
+		Map<String,HokeDataPackage> pool = HokePool.getPool();
+		HokeDataPackage hokeDataPackage = pool.get(poolKey);
+		if(hokeDataPackage == null) break;
+		StringBuilder html = new StringBuilder();
+</java>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>hoke data package detail</title>
+</head>
+<body>
+	<table width="100%">
+		<tr><td align="right">
+			<a style="font-size: 15px;color: #AE0000" href=""+contextPath+"/hoke?token="+token+""><b>Hoke</b></a>
+		</td></tr>
+		<tr><td align="center"><font size="28">Hoke Data Package Detail</font></td></tr>
+
+		<tr><td><table cellspacing="0px"><tr><td style="background-color: #AE0000">
+		&nbsp;<font color="white"><b>Package Detail</b></font>&nbsp;
+		</td></tr></table></td></tr>
+		<tr><td height="2px" style="background-color: #AE0000"></td></tr>
+		<tr><td>
+			<table width="100%">
+				<tr style="background-color: #F0F0F0;">
+					<td align="left">&nbsp;</td>
+					<td align="left"><b>属性</b></td>
+					<td align="left"><b>值</b></td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">状态</td>
+					<td align="left">"+hokeDataPackage.getStatus().desc+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">method</td>
+					<td align="left">"+hokeDataPackage.getMethod().toString()+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">params</td>
+					<td align="left">
+						<java>
+						if (hokeDataPackage.getParams() != null){
+						</java>
+						<table>
+							<java>
+							for (Object param:hokeDataPackage.getParams()){
+							</java>
+							<tr><td>"+JsonUtil.toJson(param)+"</td></tr>
+							<java>
+							}
+							</java>
+						</table>
+						<java>
+						}
+						</java>
+					</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">timeOut</td>
+					<td align="left">"+hokeDataPackage.getTimeOut()+"秒</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">data</td>
+					<java>
+					String dataJson = "";
+					try {
+						Object data = hokeDataPackage.getData();
+						if (data != null) {
+							dataJson = JsonUtil.toJson(data);
+						}
+					} catch (Throwable e) {
+						e.printStackTrace();
+					}
+					</java>
+					<td align="left">"+dataJson+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">throwable</td>
+					<java>
+					String throwableStr = "";
+					if(hokeDataPackage.getThrowable() != null){
+						throwableStr = hokeDataPackage.getThrowable().getMessage();
+					}
+					</java>
+					<td align="left">"+throwableStr+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">磁盘刷新时间</td>
+					<java>
+					SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+					String flushDiskTime = "";
+					if (hokeDataPackage.getFlushDiskTime() > 0){
+						flushDiskTime = sdf.format(new Date(hokeDataPackage.getFlushDiskTime()));
+					}
+					</java>
+					<td align="left">"+flushDiskTime+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">内存刷新时间</td>
+					<java>
+					String flushMemTime = "";
+					if (hokeDataPackage.getFlushMemTime() > 0){
+						flushMemTime = sdf.format(new Date(hokeDataPackage.getFlushMemTime()));
+					}
+					</java>
+					<td align="left">"+flushMemTime+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">最后一次耗时</td>
+					<td align="left">"+hokeDataPackage.getTakeTime()+"毫秒</td>
+				</tr>
+			</table>
+		</td></tr><tr><td>&nbsp;</td></tr>
+
+	</table>
+</body>
+</html>
+<java>
+		printHtml(response, html.toString());
+	} while (false);
+}
+</java>

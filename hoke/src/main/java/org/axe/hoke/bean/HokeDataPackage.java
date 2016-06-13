@@ -2,6 +2,7 @@ package org.axe.hoke.bean;
 
 import java.lang.reflect.Method;
 
+import org.axe.hoke.constant.HokeDataStatus;
 import org.axe.hoke.helper.HokeStorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +54,10 @@ public class HokeDataPackage {
 	 * 暂无实际用处，给debug统计用
 	 */
 	private long takeTime = 0;
+	/**
+	 * 状态
+	 */
+	private HokeDataStatus status = HokeDataStatus.WAITING;
 	
 	public HokeDataPackage(
 			String poolKey, 
@@ -74,27 +79,21 @@ public class HokeDataPackage {
 	 * 刷新单体Hoke数据
 	 */
 	public void flushData() {
-		long start = 0;
-		if (LOGGER.isInfoEnabled()) {
-			start = System.currentTimeMillis();
-		}
+		long start = System.currentTimeMillis();
 		try {
+			this.status = HokeDataStatus.FLUSHING;
 			Object data = methodProxy.invokeSuper(obj, params);
 			HokeStorageHelper.saveData(poolKey, data);
 			this.flushDiskTime = System.currentTimeMillis();
 			this.throwable = null;
-			if (LOGGER.isInfoEnabled()) {
-				this.takeTime = this.flushDiskTime - start;
-			}
+			this.status = HokeDataStatus.SUCCESS;
+			this.takeTime = this.flushDiskTime - start;
 		} catch (Throwable e) {
+			this.status = HokeDataStatus.FAILED;
 			this.throwable = e;
 			e.printStackTrace();
 			LOGGER.error("refresh data failed",e);
 		}
-	}
-
-	public String getPoolKey() {
-		return poolKey;
 	}
 	
 	public Object getData() throws Throwable {
@@ -122,16 +121,51 @@ public class HokeDataPackage {
 	public void clearData(){
 		this.data = null;
 	}
-
-	public long getTakeTime() {
-		return takeTime;
-	}
 	
 	public boolean isEmpty(){
 		return this.data == null;
 	}
 
+	
+	/**
+	 * ************************** GET 方法 区域  ********************************
+	 */
+
+	public String getPoolKey() {
+		return poolKey;
+	}
+
+	public Object[] getParams() {
+		return params;
+	}
+
+	public Method getMethod() {
+		return method;
+	}
+
+	public long getTimeOut() {
+		return timeOut;
+	}
+
 	public Throwable getThrowable() {
 		return throwable;
 	}
+
+	public long getFlushDiskTime() {
+		return flushDiskTime;
+	}
+
+	public long getFlushMemTime() {
+		return flushMemTime;
+	}
+
+	public long getTakeTime() {
+		return takeTime;
+	}
+
+	public HokeDataStatus getStatus() {
+		return status;
+	}
+	
+	
 }
