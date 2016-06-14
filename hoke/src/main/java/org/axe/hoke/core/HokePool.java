@@ -9,6 +9,7 @@ import java.util.Map;
 import org.axe.hoke.annotation.HokeConfig;
 import org.axe.hoke.bean.HokeDataPackage;
 import org.axe.hoke.bean.KeyValue;
+import org.axe.hoke.helper.HokeStorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -23,16 +24,25 @@ public final class HokePool {
 	/**
 	 * 真正的缓存
 	 */
-	private static final Map<String, HokeDataPackage> POOL;
+	private static Map<String, HokeDataPackage> POOL;
 
 	/**
 	 * 等待被缓存的键
 	 */
-	private static final List<KeyValue<String, HokeDataPackage>> POOL_TASK_QUEE;
+	private static List<KeyValue<String, HokeDataPackage>> POOL_TASK_QUEE;
 
 	static {
-		POOL = new HashMap<>();
-		POOL_TASK_QUEE = new ArrayList<>();
+		init();
+	}
+	
+	public static void init(){
+		synchronized (POOL) {
+			synchronized (POOL_TASK_QUEE) {
+				POOL = new HashMap<>();
+				POOL_TASK_QUEE = new ArrayList<>();
+				HokeStorageHelper.clear();
+			}
+		}
 	}
 
 	public static Map<String, HokeDataPackage> getPool() {

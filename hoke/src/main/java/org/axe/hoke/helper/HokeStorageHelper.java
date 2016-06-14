@@ -17,7 +17,16 @@ import org.slf4j.LoggerFactory;
  */
 public final class HokeStorageHelper {
 	private static Logger LOGGER = LoggerFactory.getLogger(HokeStorageHelper.class);
-
+	
+	public static synchronized void clear(){
+		File dir = getCacheFileDir();
+		if(dir.exists()){
+			if(dir.isDirectory()){
+				dir.delete();
+			}
+		}
+	}
+	
 	public static synchronized void saveData(String poolKey, Object data)throws Exception{
 		try {
 			File cacheFile = getCacheFile(poolKey);
