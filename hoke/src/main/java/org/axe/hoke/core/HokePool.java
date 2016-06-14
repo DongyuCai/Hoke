@@ -24,22 +24,24 @@ public final class HokePool {
 	/**
 	 * 真正的缓存
 	 */
-	private static Map<String, HokeDataPackage> POOL;
+	private static final Map<String, HokeDataPackage> POOL;
 
 	/**
 	 * 等待被缓存的键
 	 */
-	private static List<KeyValue<String, HokeDataPackage>> POOL_TASK_QUEE;
+	private static final List<KeyValue<String, HokeDataPackage>> POOL_TASK_QUEE;
 
 	static {
+		POOL = new HashMap<>();
+		POOL_TASK_QUEE = new ArrayList<>();
 		init();
 	}
 	
 	public static void init(){
 		synchronized (POOL) {
 			synchronized (POOL_TASK_QUEE) {
-				POOL = new HashMap<>();
-				POOL_TASK_QUEE = new ArrayList<>();
+				POOL.clear();
+				POOL_TASK_QUEE.clear();
 				HokeStorageHelper.clear();
 			}
 		}

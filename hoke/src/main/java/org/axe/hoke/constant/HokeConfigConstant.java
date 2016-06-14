@@ -6,7 +6,7 @@ package org.axe.hoke.constant;
  */
 public interface HokeConfigConstant {
 	//#配置项
-	String HOKE_CACHE_FILE_DIR = "hoke.cache_file_dir";
+	String HOKE_CACHE_FILE_DIR = "axe.hoke.cache_file_dir";
 	
 	//#默认值
 	String CACHE_FILE_DIR_DEFAULT = "hoke/data";
