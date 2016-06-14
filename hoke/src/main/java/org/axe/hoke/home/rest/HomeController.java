@@ -139,10 +139,11 @@ html.append("<td align=\"left\"><b>timeOut(s)</b></td>");
 html.append("<td align=\"left\"><b>takeTime(ms)</b></td>");
 html.append("<td align=\"left\"><b>status</b></td>");
 html.append("</tr>");
+int index = 1;
 for (Map.Entry<String, HokeDataPackage> entry : HokePool.getPool().entrySet()) {
 HokeDataPackage hokeDataPackage = entry.getValue();
 html.append("<tr>");
-html.append("<td align=\"left\">&nbsp;</td>");
+html.append("<td align=\"left\">"+index+++"</td>");
 html.append("<td align=\"left\"><a href=\""+contextPath+"/hoke/hoke_data_package?poolKey="+hokeDataPackage.getPoolKey()+"?token="+token+"\">"+hokeDataPackage.getPoolKey()+"</a></td>");
 html.append("<td align=\"left\">"+hokeDataPackage.getTimeOut()+"</td>");
 html.append("<td align=\"left\">"+hokeDataPackage.getTakeTime()+"</td>");
