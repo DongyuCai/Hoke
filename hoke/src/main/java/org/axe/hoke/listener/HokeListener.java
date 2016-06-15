@@ -1,6 +1,6 @@
 package org.axe.hoke.listener;
 
-import org.axe.hoke.core.HokeThread;
+import org.axe.hoke.thread.HokeThread;
 import org.axe.interface_.mvc.Listener;
 
 public class HokeListener implements Listener{

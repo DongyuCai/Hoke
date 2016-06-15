@@ -1,5 +1,6 @@
-package org.axe.hoke.core;
+package org.axe.hoke.thread;
 
+import org.axe.hoke.core.HokePool;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

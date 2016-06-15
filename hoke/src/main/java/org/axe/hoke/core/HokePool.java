@@ -9,6 +9,7 @@ import java.util.Map;
 import org.axe.hoke.annotation.HokeConfig;
 import org.axe.hoke.bean.HokeDataPackage;
 import org.axe.hoke.bean.KeyValue;
+import org.axe.hoke.captain.HokeCaptainHelper;
 import org.axe.hoke.helper.HokeStorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -51,13 +52,30 @@ public final class HokePool {
 		return POOL;
 	}
 	
+	public static Object getData(String poolKey){
+		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
+		try {
+			return hokeDataPackage == null?null:hokeDataPackage.getData();
+		} catch (Throwable e) {
+			return null;
+		}
+	}
+	
 	public static Object getData(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
 		// #根据参数，计算出数据存放的key
 		String poolKey = generatePoolKey(method, params);
 		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
 		if (hokeDataPackage == null) {
 			
-			addTask2Quee(poolKey, method, obj, params, methodProxy);
+			//#如果Captain开着
+			//#先询问Captain试试，如果有结果最好
+			Object data = HokeCaptainHelper.getData(poolKey, method.getReturnType());
+			if(data != null){
+				return data;
+			}else{
+				addTask2Quee(poolKey, method, obj, params, methodProxy);
+			}
+			
 			/*
 			 * synchronized (POOL) { try { if(POOL.containsKey(poolKey)){ data =
 			 * POOL.get(poolKey); }else{ //放着，等HokeThread更新 HokeConfig config =
