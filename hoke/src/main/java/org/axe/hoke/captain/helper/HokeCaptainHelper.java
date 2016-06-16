@@ -1,8 +1,10 @@
 package org.axe.hoke.captain.helper;
 
+import org.axe.annotation.ioc.Autowired;
 import org.axe.annotation.ioc.Component;
 import org.axe.captain.bean.TeamTable;
 import org.axe.captain.helper.CaptainHelper;
+import org.axe.hoke.captain.constant.HokeCaptainQuestionType;
 import org.axe.util.StringUtil;
 
 /**
@@ -11,6 +13,9 @@ import org.axe.util.StringUtil;
  */
 @Component
 public final class HokeCaptainHelper {
+	
+	@Autowired
+	private CaptainHelper captainHelper;
 	
 	//#打开Captain模式需要两个步骤，一个Captain地址，一个MyHost地址
 	private boolean isCaptainOpened(){
@@ -23,7 +28,7 @@ public final class HokeCaptainHelper {
 		//#如果打开了captain模式
 		if(isCaptainOpened()){
 			try {
-				String result = CaptainHelper.askCaptain(url);
+				String result = captainHelper.askCaptain(HokeCaptainQuestionType.PROXY,url);
 				return result == null?"":result;
 			} catch (Exception e) {
 				e.printStackTrace();

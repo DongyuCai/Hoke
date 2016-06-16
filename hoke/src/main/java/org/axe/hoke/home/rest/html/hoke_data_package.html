@@ -1,6 +1,6 @@
 <java>
-@Request(value = "/hoke_data_package", method = RequestMethod.GET)
-public void actionDetail(@RequestParam("poolKey") String poolKey, @RequestParam("token")String token, HttpServletRequest request, HttpServletResponse response) {
+@Request(value = "/hoke_data_package/view", method = RequestMethod.GET)
+public void hokeDataPackageView(@RequestParam("poolKey") String poolKey, @RequestParam("token")String token, HttpServletRequest request, HttpServletResponse response) {
 	String contextPath = request.getContextPath();
 	do {
 		if (StringUtil.isEmpty(poolKey)) break;
@@ -13,7 +13,7 @@ public void actionDetail(@RequestParam("poolKey") String poolKey, @RequestParam(
 <html>
 <head>
 	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
-	<title>hoke data package detail</title>
+	<title>hoke data package view</title>
 </head>
 <body>
 	<table width="100%">
@@ -133,5 +133,51 @@ public void actionDetail(@RequestParam("poolKey") String poolKey, @RequestParam(
 <java>
 		printHtml(response, html.toString());
 	} while (false);
+}
+
+@Request(value = "/hoke_data_package/delete", method = RequestMethod.GET)
+public void hokeDataPackageDelete(@RequestParam("poolKey") String poolKey, @RequestParam("token")String token, HttpServletRequest request, HttpServletResponse response) {
+	String contextPath = request.getContextPath();
+	
+	boolean success = HokePool.removeHokeData(poolKey);
+	String result = "SUCCESS!";
+	if(!success){
+		result = "FAILED!";
+	}
+	StringBuilder html = new StringBuilder();
+</java>
+<!DOCTYPE html>
+<html>
+<head>
+	<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+	<title>hoke data package delete</title>
+	<script type="text/javascript">
+		var number = 10;
+
+		var int=self.setInterval("toHome()",1000);
+
+		function toHome(){
+			number = number-1;
+			document.getElementById("number").innerHTML = number;
+			if(number <= 0){
+				window.clearInterval(int);
+				window.location = ""+contextPath+"/hoke?token="+token+"";
+			}
+		}
+		
+	</script>
+</head>
+<body>
+	<table width="100%">
+		<tr><td align="right">
+			<a style="font-size: 15px;color: #AE0000" href=""+contextPath+"/hoke?token="+token+""><b>Hoke</b></a>
+		</td></tr>
+		<tr><td align="center"><font size="28">Hoke Data Package Delete "+result+"</font></td></tr>
+		<tr><td align="center"><span id="number">10</span>秒后自动跳转<a href=""+contextPath+"/hoke?token="+token+"">/hoke首页</a></td></tr>
+	</table>
+</body>
+</html>
+<java>
+	printHtml(response, html.toString());
 }
 </java>

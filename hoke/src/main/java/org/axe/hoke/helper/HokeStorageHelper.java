@@ -27,6 +27,18 @@ public final class HokeStorageHelper {
 		}
 	}
 	
+	public static synchronized void deleteCacheFile(String poolKey){
+		try {
+			File cacheFile = getCacheFile(poolKey);
+			if(cacheFile.exists()){
+				cacheFile.delete();
+			}
+		} catch (Exception e) {
+			LOGGER.error("hoke storage delete cacheFile failed",e);
+			throw e;
+		}
+	}
+	
 	public static synchronized void saveData(String poolKey, Object data)throws Exception{
 		try {
 			File cacheFile = getCacheFile(poolKey);
@@ -35,7 +47,7 @@ public final class HokeStorageHelper {
 			writer.write(json);
 			writer.close();
 		} catch (Exception e) {
-			LOGGER.error("hoke storage-saveData failed",e);
+			LOGGER.error("hoke storage saveData failed",e);
 			throw e;
 		}
 	}

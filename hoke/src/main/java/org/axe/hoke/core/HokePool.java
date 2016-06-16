@@ -225,6 +225,25 @@ public final class HokePool {
 		}
 	}
 
+	/**
+	 * 移除HokeData，守护线程不在对此数据做Hoke，
+	 * 释放内存、磁盘的资源，
+	 * 但是当方法重新被调用时，还会重新Hoke
+	 */
+	public static boolean removeHokeData(String poolKey){
+		synchronized (POOL) {
+			if(POOL.containsKey(poolKey)){
+				//#删除键值
+				POOL.remove(poolKey);
+			}else{
+				return false;
+			}
+		}
+		//#删除磁盘文件
+		HokeStorageHelper.deleteCacheFile(poolKey);
+		return true;
+	}
+	
 	private static String generatePoolKey(Method method, Object[] params) {
 		StringBuilder poolKey = new StringBuilder();
 		poolKey.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append("_");
