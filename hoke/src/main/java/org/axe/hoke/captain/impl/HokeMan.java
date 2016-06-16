@@ -1,4 +1,4 @@
-package org.axe.hoke.captain;
+/*package org.axe.hoke.captain.impl;
 
 import org.axe.annotation.ioc.Component;
 import org.axe.captain.interface_.Man;
@@ -25,3 +25,4 @@ public class HokeMan implements Man{
 	}
 
 }
+*/

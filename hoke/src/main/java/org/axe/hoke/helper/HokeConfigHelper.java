@@ -16,4 +16,11 @@ public final class HokeConfigHelper{
 	public static String getCacheFileDir(){
 		return PropsUtil.getString(ConfigHelper.getCONFIG_PROPS(), HokeConfigConstant.HOKE_CACHE_FILE_DIR, HokeConfigConstant.CACHE_FILE_DIR_DEFAULT);
 	}
+	
+	/**
+	 * 获取配置的缓存文件路径
+	 */
+	public static String getCaptainStrategy(){
+		return PropsUtil.getString(ConfigHelper.getCONFIG_PROPS(), HokeConfigConstant.HOKE_CAPTAIN_STRATEGY, "org.axe.hoke.captain.strategy.DefaultHokeCaptainStrategy");
+	}
 }

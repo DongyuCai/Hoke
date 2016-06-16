@@ -9,7 +9,6 @@ import java.util.Map;
 import org.axe.hoke.annotation.HokeConfig;
 import org.axe.hoke.bean.HokeDataPackage;
 import org.axe.hoke.bean.KeyValue;
-import org.axe.hoke.captain.HokeCaptainHelper;
 import org.axe.hoke.helper.HokeStorageHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -66,7 +65,7 @@ public final class HokePool {
 		String poolKey = generatePoolKey(method, params);
 		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
 		if (hokeDataPackage == null) {
-			
+			/*
 			//#如果Captain开着
 			//#先询问Captain试试，如果有结果最好
 			Object data = HokeCaptainHelper.getData(poolKey, method.getReturnType());
@@ -74,7 +73,9 @@ public final class HokePool {
 				return data;
 			}else{
 				addTask2Quee(poolKey, method, obj, params, methodProxy);
-			}
+			}*/
+			
+			addTask2Quee(poolKey, method, obj, params, methodProxy);
 			
 			/*
 			 * synchronized (POOL) { try { if(POOL.containsKey(poolKey)){ data =
@@ -226,8 +227,7 @@ public final class HokePool {
 
 	private static String generatePoolKey(Method method, Object[] params) {
 		StringBuilder poolKey = new StringBuilder();
-		poolKey.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append("_")
-				.append(method.toString().hashCode()).append("_");
+		poolKey.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append("_");
 		int hashCode = 0;
 		for (Object obj : params) {
 			hashCode = hashCode + obj.hashCode();

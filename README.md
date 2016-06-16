@@ -22,3 +22,5 @@
 * @HokeConfig
 * 配置参数
 * 监控页面 
+* hoke/proxy
+* HokeCaptainStrategy

@@ -25,7 +25,7 @@ import org.axe.util.StringUtil;
 
 @FilterFuckOff
 @Interceptor({ HomeInterceptor.class, SignInInterceptor.class })
-@Controller(basePath = "/hoke")
+@Controller(basePath = "hoke")
 public class HomeController {
 
 private void printHtml(HttpServletResponse response, String html) {
