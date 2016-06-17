@@ -22,7 +22,7 @@ public final class HokeStorageHelper {
 		File dir = getCacheFileDir();
 		if(dir.exists()){
 			if(dir.isDirectory()){
-				dir.delete();
+				FileUtil.deleteDir(dir);
 			}
 		}
 	}
@@ -31,7 +31,7 @@ public final class HokeStorageHelper {
 		try {
 			File cacheFile = getCacheFile(poolKey);
 			if(cacheFile.exists()){
-				cacheFile.delete();
+				FileUtil.deleteDir(cacheFile);
 			}
 		} catch (Exception e) {
 			LOGGER.error("hoke storage delete cacheFile failed",e);

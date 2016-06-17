@@ -32,4 +32,4 @@
  * axe.hoke.captain.strategy
 * HokeCaptainStrategy Captain策略
 * 访问 hoke/proxy 使用Axe-Captain
-* 监控页面 
+* 访问 监控页面 /hoke
