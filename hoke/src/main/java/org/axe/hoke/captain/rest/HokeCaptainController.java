@@ -1,6 +1,5 @@
 package org.axe.hoke.captain.rest;
 
-import org.axe.annotation.ioc.Autowired;
 import org.axe.annotation.ioc.Controller;
 import org.axe.annotation.mvc.Request;
 import org.axe.annotation.mvc.RequestParam;
@@ -19,11 +18,9 @@ import org.axe.hoke.captain.helper.HokeCaptainHelper;
 @Controller(basePath="hoke")
 public class HokeCaptainController {
 	
-	@Autowired
-	private HokeCaptainHelper hokeCaptainHelper;
 	
 	@Request(value="proxy", method=RequestMethod.GET)
 	public String proxy(@RequestParam("url")String url){
-		return hokeCaptainHelper.askCaptainProxyUrl(url);
+		return HokeCaptainHelper.askCaptain4ProxyUrl(url);
 	}
 }

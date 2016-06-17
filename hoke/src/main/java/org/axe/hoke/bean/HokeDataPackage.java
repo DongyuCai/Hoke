@@ -2,6 +2,7 @@ package org.axe.hoke.bean;
 
 import java.lang.reflect.Method;
 
+import org.axe.hoke.captain.helper.HokeCaptainHelper;
 import org.axe.hoke.constant.HokeDataStatus;
 import org.axe.hoke.helper.HokeStorageHelper;
 import org.slf4j.Logger;
@@ -105,6 +106,12 @@ public class HokeDataPackage {
 			if(data != null){
 				//记录数据从磁盘拉取的时间
 				this.flushMemTime = System.currentTimeMillis();
+				
+				//#这里是Hoke代码唯一与Captain有联系的地方，删除Hoke里的captain包，这里会报错
+				//#请求到这里取数据，说明其他组员的“这个数据”客户抛弃了
+				//#而且必须是等到这里的磁盘真的准备好数据了，这样中间有段时间，其他组员还可以提供数据支持
+				//#因为从这里娶不到数据，那么真正客户端请求的组员会自己缓存，等到这里准备好了，才会弃用那边的
+				HokeCaptainHelper.askCaptain4ClearData(poolKey);
 			}
 		}
 		return this.data;

@@ -8,4 +8,6 @@ public interface HokeCaptainQuestionType {
 	
 	String PROXY = "PROXY";
 	
+	String CLEAR_DATA = "CLEAR_DATA";
+	
 }

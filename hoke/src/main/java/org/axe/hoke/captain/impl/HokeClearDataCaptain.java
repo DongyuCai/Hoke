@@ -7,15 +7,15 @@ import org.axe.hoke.captain.interface_.HokeCaptainStrategy;
 import org.axe.util.ClassUtil;
 import org.axe.util.ReflectionUtil;
 /**
- * Hoke 的负责代理的Captain，
- * 负责给请求返回一台Team表中的机器
+ * Hoke 的负责清理数据 的 Captain，
+ * 负责接受某个组员的清理请求，再将清理请求转发给其他组员
  * Created by CaiDongYu on 2016年6月17日 上午10:06:45.
  */
-public class HokeProxyCaptain implements Captain{
+public class HokeClearDataCaptain implements Captain{
 	
 	private HokeCaptainStrategy hokeCaptainStrategy;
 	{
-		String hokeCaptainStrategyPath = HokeCaptainConfigHelper.getCaptainProxyStrategy();
+		String hokeCaptainStrategyPath = HokeCaptainConfigHelper.getCaptainClearDataStrategy();
 		Class<?> hokeCaptainStrategyClass = ClassUtil.loadClass(hokeCaptainStrategyPath, false);
 		hokeCaptainStrategy = ReflectionUtil.newInstance(hokeCaptainStrategyClass);
 	}
@@ -23,12 +23,12 @@ public class HokeProxyCaptain implements Captain{
 
 	@Override
 	public String accpetQuestionType() {
-		return HokeCaptainQuestionType.PROXY;
+		return HokeCaptainQuestionType.CLEAR_DATA;
 	}
 	
 	@Override
-	public Object answerQuestion(String url) {
-		return hokeCaptainStrategy.doStrategy(url);
+	public Object answerQuestion(String hostAndPoolKey) {
+		return hokeCaptainStrategy.doStrategy(hostAndPoolKey);
 	}
 
 }

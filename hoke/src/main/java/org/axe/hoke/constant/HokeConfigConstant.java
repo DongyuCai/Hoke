@@ -8,8 +8,6 @@ public interface HokeConfigConstant {
 	//#配置项
 	//#磁盘缓存文件地址
 	String HOKE_CACHE_FILE_DIR = "axe.hoke.cache_file_dir";
-	//#Hoke使用Captain时候，提供的分派策略类
-	String HOKE_CAPTAIN_STRATEGY = "axe.hoke.captain.strategy";
 	
 	//#默认值
 	String CACHE_FILE_DIR_DEFAULT = "hoke/data";

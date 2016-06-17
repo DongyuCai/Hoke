@@ -6,10 +6,10 @@ import org.axe.captain.bean.TeamTable;
 import org.axe.hoke.captain.interface_.HokeCaptainStrategy;
 
 /**
- * 默认的
+ * 默认的 Hoke 负责代理的 Captain的策略实现
  * Created by CaiDongYu on 2016年6月16日 上午10:09:50.
  */
-public class DefaultHokeCaptainStrategy implements HokeCaptainStrategy{
+public class DefaultHokeCaptainProxyStrategy implements HokeCaptainStrategy{
 
 	@Override
 	public String doStrategy(String url) {

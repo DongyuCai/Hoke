@@ -229,6 +229,7 @@ public final class HokePool {
 	 * 移除HokeData，守护线程不在对此数据做Hoke，
 	 * 释放内存、磁盘的资源，
 	 * 但是当方法重新被调用时，还会重新Hoke
+	 * TODO:如果数据量过多，flushPool线程会长时间持有POOL锁，导致这里删除巨慢，有待改进
 	 */
 	public static boolean removeHokeData(String poolKey){
 		synchronized (POOL) {
