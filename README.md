@@ -27,6 +27,9 @@
 ##Get Start
 * @Hoke
 * @HokeConfig
+ * lazyLoad
+ * refreshSeconds
+ * timeOut
 * 配置参数
  * axe.hoke.cache_file_dir
  * axe.hoke.captain.strategy

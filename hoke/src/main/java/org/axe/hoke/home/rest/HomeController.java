@@ -136,25 +136,52 @@ public class HomeController {
 		html.append("<table width=\"100%\">");
 		html.append("<tr style=\"background-color: #F0F0F0;\">");
 		html.append("<td align=\"left\">&nbsp;</td>");
-		html.append("<td align=\"left\"><b>Hoke Method</b></td>");
-		html.append("<td align=\"left\"><b>timeOut(s)</b></td>");
-		html.append("<td align=\"left\"><b>takeTime(ms)</b></td>");
-		html.append("<td align=\"left\"><b>status</b></td>");
+		html.append("<td align=\"left\"><b>ID(PoolKey)</b></td>");
+		html.append("<td align=\"left\"><b>懒加载</b></td>");
+		html.append("<td align=\"left\"><b>刷新间隔(s)</b></td>");
+		html.append("<td align=\"left\"><b>刷新耗时(ms)</b></td>");
+		html.append("<td align=\"left\"><b>托管超时时间</b></td>");
+		html.append("<td align=\"left\"><b>内存</b></td>");
+		html.append("<td align=\"left\"><b>状态</b></td>");
 		html.append("<td align=\"left\"><b>操作</b></td>");
 		html.append("</tr>");
 		int index = 1;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		for (Map.Entry<String, HokeDataPackage> entry : HokePool.getPool().entrySet()) {
 			HokeDataPackage hokeDataPackage = entry.getValue();
+			String poolKey = hokeDataPackage.getPoolKey();
+			String simplePoolKey = poolKey;
+			int dotIndex = simplePoolKey.lastIndexOf(".");
+			if (dotIndex >= 0) {
+				simplePoolKey = poolKey.substring(0, dotIndex);
+				dotIndex = simplePoolKey.lastIndexOf(".");
+			}
+			if (dotIndex >= 0) {
+				simplePoolKey = poolKey.substring(dotIndex + 1);
+			} else {
+				simplePoolKey = poolKey;
+			}
+
+			// #托管超时时间
+			String timeOutTime = "-";
+			if (hokeDataPackage.getTimeOutTime() > 0) {
+				timeOutTime = sdf.format(new Date(hokeDataPackage.getTimeOutTime()));
+			}
+
+			// #内存是否驻留中
+			String dataExist = hokeDataPackage.isEmpty() ? "空" : "驻留";
 			html.append("<tr>");
 			html.append("<td align=\"left\">" + index++ + "</td>");
 			html.append("<td align=\"left\"><a href=\"" + contextPath + "/hoke/hoke_data_package/view?poolKey="
-					+ hokeDataPackage.getPoolKey() + "&token=" + token + "\">" + hokeDataPackage.getPoolKey()
-					+ "</a></td>");
-			html.append("<td align=\"left\">" + hokeDataPackage.getTimeOut() + "</td>");
+					+ poolKey + "&token=" + token + "\">" + simplePoolKey + "</a></td>");
+			html.append("<td align=\"left\">" + hokeDataPackage.getHokeConfig().lazyLoad() + "</td>");
+			html.append("<td align=\"left\">" + hokeDataPackage.getHokeConfig().refreshSeconds() + "</td>");
 			html.append("<td align=\"left\">" + hokeDataPackage.getTakeTime() + "</td>");
+			html.append("<td align=\"left\">" + timeOutTime + "</td>");
+			html.append("<td align=\"left\">" + dataExist + "</td>");
 			html.append("<td align=\"left\">" + hokeDataPackage.getStatus().desc + "</td>");
 			html.append("<td align=\"left\"><a href=\"" + contextPath + "/hoke/hoke_data_package/delete?poolKey="
-					+ hokeDataPackage.getPoolKey() + "&token=" + token + "\">删除</td>");
+					+ poolKey + "&token=" + token + "\">删除</td>");
 			html.append("</tr>");
 		}
 		html.append("</table>");
@@ -210,12 +237,12 @@ public class HomeController {
 			html.append("</tr>");
 			html.append("<tr>");
 			html.append("<td align=\"left\">&nbsp;</td>");
-			html.append("<td align=\"left\">method</td>");
+			html.append("<td align=\"left\">Hoke方法</td>");
 			html.append("<td align=\"left\">" + hokeDataPackage.getMethod().toString() + "</td>");
 			html.append("</tr>");
 			html.append("<tr>");
 			html.append("<td align=\"left\">&nbsp;</td>");
-			html.append("<td align=\"left\">params</td>");
+			html.append("<td align=\"left\">参数</td>");
 			html.append("<td align=\"left\">");
 			if (hokeDataPackage.getParams() != null) {
 				html.append("<table>");
@@ -228,12 +255,22 @@ public class HomeController {
 			html.append("</tr>");
 			html.append("<tr>");
 			html.append("<td align=\"left\">&nbsp;</td>");
-			html.append("<td align=\"left\">timeOut</td>");
-			html.append("<td align=\"left\">" + hokeDataPackage.getTimeOut() + "秒</td>");
+			html.append("<td align=\"left\">是否懒加载</td>");
+			html.append("<td align=\"left\">" + hokeDataPackage.getHokeConfig().lazyLoad() + "</td>");
 			html.append("</tr>");
 			html.append("<tr>");
 			html.append("<td align=\"left\">&nbsp;</td>");
-			html.append("<td align=\"left\">data</td>");
+			html.append("<td align=\"left\">刷新间隔(s)</td>");
+			html.append("<td align=\"left\">" + hokeDataPackage.getHokeConfig().refreshSeconds() + "</td>");
+			html.append("</tr>");
+			html.append("<tr>");
+			html.append("<td align=\"left\">&nbsp;</td>");
+			html.append("<td align=\"left\">托管超时间隔(s)</td>");
+			html.append("<td align=\"left\">" + hokeDataPackage.getHokeConfig().timeOut() + " //小于等于0都是代表无限时长</td>");
+			html.append("</tr>");
+			html.append("<tr>");
+			html.append("<td align=\"left\">&nbsp;</td>");
+			html.append("<td align=\"left\">数据结果</td>");
 			String dataJson = "";
 			try {
 				Object data = hokeDataPackage.getData();
@@ -247,7 +284,7 @@ public class HomeController {
 			html.append("</tr>");
 			html.append("<tr>");
 			html.append("<td align=\"left\">&nbsp;</td>");
-			html.append("<td align=\"left\">throwable</td>");
+			html.append("<td align=\"left\">异常</td>");
 			String throwableStr = "";
 			if (hokeDataPackage.getThrowable() != null) {
 				throwableStr = hokeDataPackage.getThrowable().getMessage();
@@ -275,8 +312,17 @@ public class HomeController {
 			html.append("</tr>");
 			html.append("<tr>");
 			html.append("<td align=\"left\">&nbsp;</td>");
-			html.append("<td align=\"left\">最后一次耗时</td>");
-			html.append("<td align=\"left\">" + hokeDataPackage.getTakeTime() + "毫秒</td>");
+			html.append("<td align=\"left\">托管超时时间</td>");
+			String timeOutTime = "-";
+			if (hokeDataPackage.getTimeOutTime() > 0) {
+				timeOutTime = sdf.format(new Date(hokeDataPackage.getTimeOutTime()));
+			}
+			html.append("<td align=\"left\">" + timeOutTime + "</td>");
+			html.append("</tr>");
+			html.append("<tr>");
+			html.append("<td align=\"left\">&nbsp;</td>");
+			html.append("<td align=\"left\">耗时(ms)</td>");
+			html.append("<td align=\"left\">" + hokeDataPackage.getTakeTime() + "</td>");
 			html.append("</tr>");
 			html.append("</table>");
 			html.append("</td></tr><tr><td>&nbsp;</td></tr>");

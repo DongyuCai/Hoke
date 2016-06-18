@@ -40,12 +40,12 @@ public void hokeDataPackageView(@RequestParam("poolKey") String poolKey, @Reques
 				</tr>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">method</td>
+					<td align="left">Hoke方法</td>
 					<td align="left">"+hokeDataPackage.getMethod().toString()+"</td>
 				</tr>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">params</td>
+					<td align="left">参数</td>
 					<td align="left">
 						<java>
 						if (hokeDataPackage.getParams() != null){
@@ -66,12 +66,22 @@ public void hokeDataPackageView(@RequestParam("poolKey") String poolKey, @Reques
 				</tr>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">timeOut</td>
-					<td align="left">"+hokeDataPackage.getTimeOut()+"秒</td>
+					<td align="left">是否懒加载</td>
+					<td align="left">"+hokeDataPackage.getHokeConfig().lazyLoad()+"</td>
 				</tr>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">data</td>
+					<td align="left">刷新间隔(s)</td>
+					<td align="left">"+hokeDataPackage.getHokeConfig().refreshSeconds()+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">托管超时间隔(s)</td>
+					<td align="left">"+hokeDataPackage.getHokeConfig().timeOut()+" //小于等于0都是代表无限时长</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">数据结果</td>
 					<java>
 					String dataJson = "";
 					try {
@@ -87,7 +97,7 @@ public void hokeDataPackageView(@RequestParam("poolKey") String poolKey, @Reques
 				</tr>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">throwable</td>
+					<td align="left">异常</td>
 					<java>
 					String throwableStr = "";
 					if(hokeDataPackage.getThrowable() != null){
@@ -121,8 +131,19 @@ public void hokeDataPackageView(@RequestParam("poolKey") String poolKey, @Reques
 				</tr>
 				<tr>
 					<td align="left">&nbsp;</td>
-					<td align="left">最后一次耗时</td>
-					<td align="left">"+hokeDataPackage.getTakeTime()+"毫秒</td>
+					<td align="left">托管超时时间</td>
+					<java>
+					String timeOutTime = "-";
+					if (hokeDataPackage.getTimeOutTime() > 0){
+						timeOutTime = sdf.format(new Date(hokeDataPackage.getTimeOutTime()));
+					}
+					</java>
+					<td align="left">"+timeOutTime+"</td>
+				</tr>
+				<tr>
+					<td align="left">&nbsp;</td>
+					<td align="left">耗时(ms)</td>
+					<td align="left">"+hokeDataPackage.getTakeTime()+"</td>
 				</tr>
 			</table>
 		</td></tr><tr><td>&nbsp;</td></tr>

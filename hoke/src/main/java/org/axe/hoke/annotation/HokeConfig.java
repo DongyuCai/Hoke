@@ -22,13 +22,27 @@ public @interface HokeConfig {
 	 * 直到方法结果被作为异步任务执行完成。
 	 * 默认关闭。
 	 */
-	boolean lazy() default false;
+	boolean lazyLoad() default false;
 	
 	/**
 	 * 异步数据同步间隔时间，
 	 * 单位是秒，
 	 * 这是个超时阈值（读yu zhi :)），
 	 * 默认0，HokeThread会不停更新这个调用。
+	 * 需要注意的是，更新周期有可能会比这个时间长。
 	 */
-	long timeOut() default 0;
+	long refreshSeconds() default 0;
+	
+	/**
+	 * Hoke数据超时时间，
+	 * 单位是秒，默认86400s，表示超过一天没被访问，就会移除托管，<=0表示无限制，
+	 * 每次被刷入内存后这个时间会与刷入内存的时间做和，
+	 * 和值就是这个数据的死亡时间，
+	 * 当系统时间超过死亡时间，数据会被移除，
+	 * 移除包括内存和磁盘，
+	 * HokeThread守护线程也不再更新这个数据，
+	 * 因为他会连PoolKey都不存在了。
+	 * 说明：如果这个数据超过timeOut秒没被访问，就会被移出托管。
+	 */
+	long timeOut() default 86400;
 }

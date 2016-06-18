@@ -2,6 +2,7 @@ package org.axe.hoke.bean;
 
 import java.lang.reflect.Method;
 
+import org.axe.hoke.annotation.HokeConfig;
 import org.axe.hoke.captain.helper.HokeCaptainHelper;
 import org.axe.hoke.constant.HokeDataStatus;
 import org.axe.hoke.helper.HokeStorageHelper;
@@ -30,9 +31,9 @@ public class HokeDataPackage {
 	private Method method;
     private MethodProxy methodProxy;
 	/**
-	 * 超时时间
+	 * HokeConfig配置
 	 */
-	private long timeOut;
+    private HokeConfig hokeConfig;
 	
 	/**
 	 * 执行结果
@@ -45,11 +46,11 @@ public class HokeDataPackage {
 	/**
 	 * 更新到磁盘的时间
 	 */
-	private long flushDiskTime = 0;
+	private long flushDiskTime;
 	/**
 	 * 数据从磁盘到内存的时间
 	 */
-	private long flushMemTime = 0;
+	private long flushMemTime;
 	/**
 	 * 统计耗时
 	 * 暂无实际用处，给debug统计用
@@ -65,14 +66,18 @@ public class HokeDataPackage {
 			Object obj, 
 			Object[] params, 
 			Method method, 
-			MethodProxy methodProxy, 
-			long timeOut) {
+			MethodProxy methodProxy,
+			HokeConfig hokeConfig) {
 		this.poolKey = poolKey;
 		this.obj = obj;
 		this.params = params;
 		this.method = method;
 		this.methodProxy = methodProxy;
-		this.timeOut = timeOut;
+		this.hokeConfig = hokeConfig;
+		
+		long now  = System.currentTimeMillis();
+		this.flushDiskTime = now;
+		this.flushMemTime = now;
 	}
 	
 	/**
@@ -117,12 +122,21 @@ public class HokeDataPackage {
 		return this.data;
 	}
 
-	public long getFlushDiskTimeOutTime(){
-		return this.timeOut*1000+this.flushDiskTime;
+	public long getNextFlushDiskTime(){
+		return this.hokeConfig.refreshSeconds()*1000+this.flushDiskTime;
 	}
 
-	public long getFlushMemTimeOutTime(){
-		return this.timeOut*1000+this.flushMemTime;
+	public long getNextFlushMemTime(){
+		return this.hokeConfig.refreshSeconds()*1000+this.flushMemTime;
+	}
+	
+	public long getTimeOutTime(){
+		if(this.hokeConfig.timeOut() <= 0){
+			//#默认配置是0，但是小于0同样么有意义
+			return 0;
+		}else{
+			return this.hokeConfig.timeOut()*1000+this.flushMemTime;
+		}
 	}
 	
 	public void clearData(){
@@ -150,10 +164,10 @@ public class HokeDataPackage {
 		return method;
 	}
 
-	public long getTimeOut() {
-		return timeOut;
+	public HokeConfig getHokeConfig() {
+		return hokeConfig;
 	}
-
+	
 	public Throwable getThrowable() {
 		return throwable;
 	}
