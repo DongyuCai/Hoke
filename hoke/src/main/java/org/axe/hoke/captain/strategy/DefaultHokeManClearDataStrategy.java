@@ -12,7 +12,6 @@ public class DefaultHokeManClearDataStrategy implements HokeCaptainStrategy{
 	@Override
 	public String doStrategy(String poolKey) {
 		//#根据poolKey清理数据
-		//TODO:清理数据
 		boolean success = HokePool.removeHokeData(poolKey);
 		if(success){
 			return "1";

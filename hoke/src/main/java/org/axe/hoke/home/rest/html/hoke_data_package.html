@@ -18,7 +18,7 @@ public void hokeDataPackageView(@RequestParam("poolKey") String poolKey, @Reques
 <body>
 	<table width="100%">
 		<tr><td align="right">
-			<a style="font-size: 15px;color: #AE0000" href=""+contextPath+"/hoke?token="+token+""><b>Hoke</b></a>
+			<a style="font-size: 15px;color: #AE0000" href=""+contextPath+"/axe-hoke?token="+token+""><b>Hoke</b></a>
 		</td></tr>
 		<tr><td align="center"><font size="28">Hoke Data Package Detail</font></td></tr>
 
@@ -182,7 +182,7 @@ public void hokeDataPackageDelete(@RequestParam("poolKey") String poolKey, @Requ
 			document.getElementById("number").innerHTML = number;
 			if(number <= 0){
 				window.clearInterval(int);
-				window.location = ""+contextPath+"/hoke?token="+token+"";
+				window.location = ""+contextPath+"/axe-hoke?token="+token+"";
 			}
 		}
 		
@@ -194,7 +194,7 @@ public void hokeDataPackageDelete(@RequestParam("poolKey") String poolKey, @Requ
 			<a style="font-size: 15px;color: #AE0000" href=""+contextPath+"/hoke?token="+token+""><b>Hoke</b></a>
 		</td></tr>
 		<tr><td align="center"><font size="28">Hoke Data Package Delete "+result+"</font></td></tr>
-		<tr><td align="center"><span id="number">10</span>秒后自动跳转<a href=""+contextPath+"/hoke?token="+token+"">/hoke首页</a></td></tr>
+		<tr><td align="center"><span id="number">10</span>秒后自动跳转<a href=""+contextPath+"/axe-hoke?token="+token+"">/hoke首页</a></td></tr>
 	</table>
 </body>
 </html>
