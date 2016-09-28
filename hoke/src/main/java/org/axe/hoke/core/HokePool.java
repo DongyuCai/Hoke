@@ -93,19 +93,19 @@ public final class HokePool {
 		long start = 0;
 		if (LOGGER.isInfoEnabled()) {
 			start = System.currentTimeMillis();
-			LOGGER.info("Hoke add task try");
+			LOGGER.debug("Hoke add task try");
 		}
 		synchronized (POOL_TASK_QUEE) {
 			if (LOGGER.isInfoEnabled()) {
 				long end = System.currentTimeMillis() - start;
-				LOGGER.info("Hoke add task start " + end + "ms");
+				LOGGER.debug("Hoke add task start " + end + "ms");
 			}
 			POOL_TASK_QUEE.add(new KeyValue<String, HokeDataPackage>(poolKey,
 					new HokeDataPackage(poolKey, obj, params, method, methodProxy, config)));
 		}
 		if (LOGGER.isInfoEnabled()) {
 			long end = System.currentTimeMillis() - start;
-			LOGGER.info("Hoke add task finished " + end + "ms");
+			LOGGER.debug("Hoke add task finished " + end + "ms");
 		}
 	}
 
@@ -117,12 +117,12 @@ public final class HokePool {
 			long start = 0;
 			if (LOGGER.isInfoEnabled()) {
 				start = System.currentTimeMillis();
-				LOGGER.info("Hoke flush task quee try");
+				LOGGER.debug("Hoke flush task quee try");
 			}
 			synchronized (POOL) {
 				if (LOGGER.isInfoEnabled()) {
 					long end = System.currentTimeMillis() - start;
-					LOGGER.info("Hoke flush task quee start " + end + "ms");
+					LOGGER.debug("Hoke flush task quee start " + end + "ms");
 				}
 				// ##只要抢到了锁，这段代码执行时间会较短
 				synchronized (POOL_TASK_QUEE) {
@@ -164,7 +164,7 @@ public final class HokePool {
 			}
 			if (LOGGER.isInfoEnabled()) {
 				long end = System.currentTimeMillis() - start;
-				LOGGER.info("Hoke flush task quee finished " + end + "ms");
+				LOGGER.debug("Hoke flush task quee finished " + end + "ms");
 			}
 		} catch (Exception e) {
 			e.printStackTrace();
@@ -181,12 +181,12 @@ public final class HokePool {
 			long start = 0;
 			if (LOGGER.isInfoEnabled()) {
 				start = System.currentTimeMillis();
-				LOGGER.info("Hoke flush pool try");
+				LOGGER.debug("Hoke flush pool try");
 			}
 			synchronized (POOL) {
 				if (LOGGER.isInfoEnabled()) {
 					long end = System.currentTimeMillis() - start;
-					LOGGER.info("Hoke flush pool start " + end + "ms");
+					LOGGER.debug("Hoke flush pool start " + end + "ms");
 				}
 
 				// #刷数据
@@ -215,7 +215,7 @@ public final class HokePool {
 						hokeDataPackage.flushData();
 					}
 					if (LOGGER.isInfoEnabled()) {
-						LOGGER.info("Hoke flush [" + hokeDataPackage.getPoolKey() + "] " + (hokeDataPackage.getTakeTime()) + "ms");
+						LOGGER.debug("Hoke flush [" + hokeDataPackage.getPoolKey() + "] " + (hokeDataPackage.getTakeTime()) + "ms");
 						
 						takeTime = takeTime+hokeDataPackage.getTakeTime();
 						
@@ -226,7 +226,7 @@ public final class HokePool {
 					}
 				}
 				if (LOGGER.isInfoEnabled()) {
-					LOGGER.info(
+					LOGGER.debug(
 							"Hoke flush pool finished " + takeTime + "ms, pool size=" + POOL.size() + ", data size=" + dataNum);
 				}
 			}
