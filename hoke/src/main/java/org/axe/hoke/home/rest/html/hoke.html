@@ -12,7 +12,7 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 	<script type="text/javascript">
 		var refreshInt = setInterval("refresh()",1000*60);
 		function refresh(){
-			window.location = ""+contextPath+"/hoke?token="+token+"";
+			window.location = ""+contextPath+"/axe-hoke?token="+token+"";
 		}
 	</script>
 </head>
@@ -134,14 +134,14 @@ public void home(@RequestParam("token")String token, HttpServletRequest request,
 				</java>
 				<tr>
 					<td align="left">"+index+++"</td>
-					<td align="left"><a href=""+contextPath+"/hoke/hoke_data_package/view?poolKey="+poolKey+"&token="+token+"">"+simplePoolKey+"</a></td>
+					<td align="left"><a href=""+contextPath+"/axe-hoke/hoke_data_package/view?poolKey="+poolKey+"&token="+token+"">"+simplePoolKey+"</a></td>
 					<td align="left">"+hokeDataPackage.getHokeConfig().lazyLoad()+"</td>
 					<td align="left">"+hokeDataPackage.getHokeConfig().refreshSeconds()+"</td>
 					<td align="left">"+hokeDataPackage.getTakeTime()+"</td>
 					<td align="left">"+timeOutTime+"</td>
 					<td align="left">"+dataExist+"</td>
 					<td align="left">"+hokeDataPackage.getStatus().desc+"</td>
-					<td align="left"><a href=""+contextPath+"/hoke/hoke_data_package/delete?poolKey="+poolKey+"&token="+token+"">删除</td>
+					<td align="left"><a href=""+contextPath+"/axe-hoke/hoke_data_package/delete?poolKey="+poolKey+"&token="+token+"">删除</td>
 				</tr>
 				<java>
 				}	

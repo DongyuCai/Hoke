@@ -20,7 +20,6 @@ public class DefaultHokeCaptainClearDataStrategy implements HokeCaptainStrategy{
 		
 		//#根据question解析出host和poolKey
 		//#根据Team表里的组员，除了host以外的，都通知清理数据，参数是poolKey
-		//TODO:转发清理数据
 		try {
 			Map<?,?> map = JsonUtil.fromJson(hostAndPoolKey, HashMap.class);
 			if(map.containsKey("host") && map.containsKey("poolKey")){
