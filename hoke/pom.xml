@@ -18,7 +18,7 @@
 		<!-- jw框架 jdk1.7 版本-->
     	<dependency>
 			<groupId>org.axe</groupId>
-			<artifactId>axe</artifactId>
+			<artifactId>captain</artifactId>
 			<version>0.1</version>
 		</dependency>
     	<dependency>
