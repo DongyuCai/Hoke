@@ -20,11 +20,12 @@ import org.axe.hoke.bean.HokeDataPackage;
 import org.axe.hoke.core.HokePool;
 import org.axe.home.interceptor.HomeInterceptor;
 import org.axe.home.interceptor.SignInInterceptor;
+import org.axe.interface_implement.mvc.AxeRequestParamAnalyzeInterceptor;
 import org.axe.util.JsonUtil;
 import org.axe.util.StringUtil;
 
 @FilterFuckOff
-@Interceptor({ HomeInterceptor.class, SignInInterceptor.class })
+@Interceptor({ AxeRequestParamAnalyzeInterceptor.class, HomeInterceptor.class, SignInInterceptor.class })
 @Controller(basePath = "axe-hoke")
 public class HomeController {
 
@@ -34,8 +35,8 @@ response.setCharacterEncoding(CharacterEncoding.UTF_8.CHARACTER_ENCODING);
 response.setContentType(ContentType.APPLICATION_HTML.CONTENT_TYPE);
 PrintWriter writer = response.getWriter();
 writer.write(html);
-writer.flush();
-writer.close();
+//writer.flush();
+//writer.close();
 } catch (Exception e) {
 e.printStackTrace();
 }
