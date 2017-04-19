@@ -26,12 +26,13 @@
 
 ##Get Start
 * @Hoke
+ * 代替@Service，建议单独写Hoke件，不要和Service混合，然后可以把Hoke件注入到Service中使用
 * @HokeConfig
- * lazyLoad
- * refreshSeconds
- * timeOut
+ * lazyLoad  是否懒加载，默认false，懒加载的Hoke节点，首次获取数据(可能第二第三次也是)会是空，因为数据在等待刷新。
+ * refreshSeconds  刷新间隔时间，秒。
+ * timeOut  数据过期时间，秒。超过这个时间，就从Hoke池里清除了。
 * 配置参数
- * axe.hoke.cache_file_dir
+ * axe.hoke.cache_file_dir    hoke磁盘数据指定存放路径，默认 hoke/data下
  * axe.hoke.captain.strategy
 * HokeCaptainStrategy Captain策略
 * 访问 hoke/proxy 使用Axe-Captain
