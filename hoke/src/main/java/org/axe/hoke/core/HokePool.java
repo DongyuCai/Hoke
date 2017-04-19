@@ -52,66 +52,71 @@ public final class HokePool {
 		return POOL;
 	}
 	
-	public static Object getData(String poolKey){
+	/*public static Object getData(String poolKey){
 		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
 		try {
 			return hokeDataPackage == null?null:hokeDataPackage.getData();
 		} catch (Throwable e) {
 			return null;
 		}
-	}
+	}*/
 	
 	public static Object getData(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
 		// #根据参数，计算出数据存放的key
 		String poolKey = generatePoolKey(method, params);
 		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
-		if (hokeDataPackage == null) {
-			addTask2Quee(poolKey, method, obj, params, methodProxy);
-			return getNativeData(poolKey,method, obj, params, methodProxy);
+		Object data = null;
+		if(hokeDataPackage == null){
+			synchronized (POOL) {
+				hokeDataPackage = POOL.get(poolKey);
+				if (hokeDataPackage == null) {
+					hokeDataPackage = addTask2Quee(poolKey, method, obj, params, methodProxy);
+					data = getNativeData(hokeDataPackage,method);
+					POOL.put(poolKey, hokeDataPackage);
+				}
+			}
 		}else{
-			Object data = hokeDataPackage.getData();
-			if(data == null){
-				return getNativeData(poolKey, method, obj, params, methodProxy);
-			}else{
-				return data;
-			}
-		}
-	}
-	
-	private static Object getNativeData(String poolKey, Method method, Object obj, Object[] params, MethodProxy methodProxy) throws Throwable{
-		// #缓存无法提供，如果还不支持异步加载，那就强制获取
-		HokeConfig annotation = method.getAnnotation(HokeConfig.class);
-		if (!annotation.lazyLoad()) {
-			HokeDataPackage hokeDataPackage = POOL.get(poolKey);
-//			Object result = methodProxy.invokeSuper(obj, params);
-			if(hokeDataPackage != null){
-				hokeDataPackage.flushData();
-				return hokeDataPackage.getData();
-			}
+			data = hokeDataPackage.getData();
 		}
 		
-		return  null;
+		return data;
 	}
 	
-	private static void addTask2Quee(String poolKey, Method method, Object obj, Object[] params, MethodProxy methodProxy){
+	private static Object getNativeData(HokeDataPackage hokeDataPackage, Method method) throws Throwable{
+		// #缓存无法提供，如果还不支持异步加载，那就强制获取
+		HokeConfig annotation = method.getAnnotation(HokeConfig.class);
+		if(hokeDataPackage != null ){
+			if (!annotation.lazyLoad()) {
+				if(hokeDataPackage.getData() == null){
+					hokeDataPackage.flushData();
+				}
+			}
+			return hokeDataPackage.getData();
+		}else{
+			return null;
+		}
+	}
+	
+	private static HokeDataPackage addTask2Quee(String poolKey, Method method, Object obj, Object[] params, MethodProxy methodProxy){
 		HokeConfig config = method.getAnnotation(HokeConfig.class);
 		long start = 0;
 		if (LOGGER.isInfoEnabled()) {
 			start = System.currentTimeMillis();
 			LOGGER.debug("Hoke add task try");
 		}
+		HokeDataPackage hokeDataPackage = new HokeDataPackage(poolKey, obj, params, method, methodProxy, config);
 		synchronized (POOL_TASK_QUEE) {
 			if (LOGGER.isInfoEnabled()) {
 				long end = System.currentTimeMillis() - start;
 				LOGGER.debug("Hoke add task start " + end + "ms");
 			}
-			POOL_TASK_QUEE.add(new KeyValue<String, HokeDataPackage>(poolKey,
-					new HokeDataPackage(poolKey, obj, params, method, methodProxy, config)));
+			POOL_TASK_QUEE.add(new KeyValue<String, HokeDataPackage>(poolKey, hokeDataPackage));
 		}
 		if (LOGGER.isInfoEnabled()) {
 			long end = System.currentTimeMillis() - start;
 			LOGGER.debug("Hoke add task finished " + end + "ms");
 		}
+		return hokeDataPackage;
 	}
 
 	/**
