@@ -67,25 +67,30 @@ public final class HokePool {
 		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
 		if (hokeDataPackage == null) {
 			addTask2Quee(poolKey, method, obj, params, methodProxy);
-			return getNativeData(method, obj, params, methodProxy);
+			return getNativeData(poolKey,method, obj, params, methodProxy);
 		}else{
 			Object data = hokeDataPackage.getData();
 			if(data == null){
-				return getNativeData(method, obj, params, methodProxy);
+				return getNativeData(poolKey, method, obj, params, methodProxy);
 			}else{
 				return data;
 			}
 		}
 	}
 	
-	private static Object getNativeData(Method method, Object obj, Object[] params, MethodProxy methodProxy) throws Throwable{
+	private static Object getNativeData(String poolKey, Method method, Object obj, Object[] params, MethodProxy methodProxy) throws Throwable{
 		// #缓存无法提供，如果还不支持异步加载，那就强制获取
 		HokeConfig annotation = method.getAnnotation(HokeConfig.class);
 		if (!annotation.lazyLoad()) {
-			return methodProxy.invokeSuper(obj, params);
-		}else{
-			return null;
+			HokeDataPackage hokeDataPackage = POOL.get(poolKey);
+//			Object result = methodProxy.invokeSuper(obj, params);
+			if(hokeDataPackage != null){
+				hokeDataPackage.flushData();
+				return hokeDataPackage.getData();
+			}
 		}
+		
+		return  null;
 	}
 	
 	private static void addTask2Quee(String poolKey, Method method, Object obj, Object[] params, MethodProxy methodProxy){
