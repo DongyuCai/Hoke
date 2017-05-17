@@ -20,12 +20,11 @@ import org.axe.hoke.bean.HokeDataPackage;
 import org.axe.hoke.core.HokePool;
 import org.axe.home.interceptor.HomeInterceptor;
 import org.axe.home.interceptor.SignInInterceptor;
-import org.axe.interface_implement.mvc.AxeRequestParamAnalyzeInterceptor;
 import org.axe.util.JsonUtil;
 import org.axe.util.StringUtil;
 
 @FilterFuckOff
-@Interceptor({ AxeRequestParamAnalyzeInterceptor.class, HomeInterceptor.class, SignInInterceptor.class })
+@Interceptor({ HomeInterceptor.class, SignInInterceptor.class })
 @Controller(basePath = "axe-hoke")
 public class HomeController {
 
