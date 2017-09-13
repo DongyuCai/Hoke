@@ -266,7 +266,7 @@ public final class HokePool {
 		return true;
 	}
 	
-	private static String generatePoolKey(Method method, Object[] params) {
+	public static String generatePoolKey(Method method, Object[] params) {
 		StringBuilder poolKey = new StringBuilder();
 		poolKey.append(method.getDeclaringClass().getName()).append(".").append(method.getName()).append("_");
 		int hashCode = 0;
