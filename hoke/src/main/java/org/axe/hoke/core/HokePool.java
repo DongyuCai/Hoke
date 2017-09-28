@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.locks.ReentrantLock;
 
 import org.axe.hoke.annotation.HokeConfig;
 import org.axe.hoke.bean.HokeDataPackage;
@@ -26,11 +27,13 @@ public final class HokePool {
 	 * 真正的缓存
 	 */
 	private static final HokeDataPool POOL;
+	private static final ReentrantLock POOL_LOCK = new ReentrantLock();
 
 	/**
 	 * 等待被缓存的键
 	 */
 	private static final List<KeyValue<String, HokeDataPackage>> POOL_TASK_QUEE;
+	private static final ReentrantLock POOL_TASK_QUEE_LOCK = new ReentrantLock();
 
 	static {
 		POOL = new HokeDataPool();
@@ -38,13 +41,23 @@ public final class HokePool {
 		init();
 	}
 	
-	public static void init(){
-		synchronized (POOL) {
-			synchronized (POOL_TASK_QUEE) {
-				POOL.clear();
-				POOL_TASK_QUEE.clear();
-				HokeStorageHelper.clear();
-			}
+	private static void init(){
+		try {
+			POOL_LOCK.lock();
+			POOL_TASK_QUEE_LOCK.lock();
+			
+			POOL.clear();
+			POOL_TASK_QUEE.clear();
+			HokeStorageHelper.clear();
+		} catch (Exception e) {
+			LOGGER.error("HokePool init failed",e);
+		} finally {
+			try {
+				POOL_LOCK.unlock();
+			} catch (Exception e2) {}
+			try {
+				POOL_TASK_QUEE_LOCK.unlock();
+			} catch (Exception e2) {}
 		}
 	}
 
@@ -52,28 +65,26 @@ public final class HokePool {
 		return POOL;
 	}
 	
-	/*public static Object getData(String poolKey){
-		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
-		try {
-			return hokeDataPackage == null?null:hokeDataPackage.getData();
-		} catch (Throwable e) {
-			return null;
-		}
-	}*/
-	
 	public static Object getData(Object obj, Method method, Object[] params, MethodProxy methodProxy) throws Throwable {
 		// #根据参数，计算出数据存放的key
 		String poolKey = generatePoolKey(method, params);
 		HokeDataPackage hokeDataPackage = POOL.get(poolKey);
 		Object data = null;
 		if(hokeDataPackage == null){
-			synchronized (POOL) {
+			try {
+				POOL_LOCK.lock();
 				hokeDataPackage = POOL.get(poolKey);
 				if (hokeDataPackage == null) {
 					hokeDataPackage = addTask2Quee(poolKey, method, obj, params, methodProxy);
 					data = getNativeData(hokeDataPackage,method);
 					POOL.put(poolKey, hokeDataPackage);
 				}
+			} catch (Exception e) {
+				LOGGER.error("Hoke getData failed",e);
+			} finally {
+				try {
+					POOL_LOCK.unlock();
+				} catch (Exception e2) {}
 			}
 		}else{
 			data = hokeDataPackage.getData();
@@ -105,12 +116,19 @@ public final class HokePool {
 			LOGGER.debug("Hoke add task try");
 		}
 		HokeDataPackage hokeDataPackage = new HokeDataPackage(poolKey, obj, params, method, methodProxy, config);
-		synchronized (POOL_TASK_QUEE) {
+		try {
+			POOL_TASK_QUEE_LOCK.lock();
 			if (LOGGER.isInfoEnabled()) {
 				long end = System.currentTimeMillis() - start;
 				LOGGER.debug("Hoke add task start " + end + "ms");
 			}
 			POOL_TASK_QUEE.add(new KeyValue<String, HokeDataPackage>(poolKey, hokeDataPackage));
+		} catch (Exception e) {
+			LOGGER.error("Hoke addTask2Quee failed",e);
+		} finally {
+			try {
+				POOL_TASK_QUEE_LOCK.unlock();
+			} catch (Exception e2) {}
 		}
 		if (LOGGER.isInfoEnabled()) {
 			long end = System.currentTimeMillis() - start;
@@ -129,13 +147,14 @@ public final class HokePool {
 				start = System.currentTimeMillis();
 				LOGGER.debug("Hoke flush task quee try");
 			}
-			synchronized (POOL) {
+			
+			if(POOL_LOCK.tryLock()){
 				if (LOGGER.isInfoEnabled()) {
 					long end = System.currentTimeMillis() - start;
 					LOGGER.debug("Hoke flush task quee start " + end + "ms");
 				}
 				// ##只要抢到了锁，这段代码执行时间会较短
-				synchronized (POOL_TASK_QUEE) {
+				if(POOL_TASK_QUEE_LOCK.tryLock()){
 					for (KeyValue<String, HokeDataPackage> task : POOL_TASK_QUEE) {
 						String key = task.getKey();
 						if (POOL.containsKey(key))
@@ -170,15 +189,21 @@ public final class HokePool {
 						//#防止队列线程紧挨着再次抢到执行权，这里没必要再次FullGC
 						POOL.setFullGc(false);
 					}
+					if (LOGGER.isInfoEnabled()) {
+						long end = System.currentTimeMillis() - start;
+						LOGGER.debug("Hoke flush task quee finished " + end + "ms");
+					}
 				}
 			}
-			if (LOGGER.isInfoEnabled()) {
-				long end = System.currentTimeMillis() - start;
-				LOGGER.debug("Hoke flush task quee finished " + end + "ms");
-			}
 		} catch (Exception e) {
-			e.printStackTrace();
 			LOGGER.error("Hoke flush task quee failed: ", e);
+		} finally {
+			try {
+				POOL_LOCK.unlock();
+			} catch (Exception e2) {}
+			try {
+				POOL_TASK_QUEE_LOCK.unlock();
+			} catch (Exception e2) {}
 		}
 	}
 
@@ -193,7 +218,7 @@ public final class HokePool {
 				start = System.currentTimeMillis();
 				LOGGER.debug("Hoke flush pool try");
 			}
-			synchronized (POOL) {
+			if(POOL_LOCK.tryLock()){
 				if (LOGGER.isInfoEnabled()) {
 					long end = System.currentTimeMillis() - start;
 					LOGGER.debug("Hoke flush pool start " + end + "ms");
@@ -243,6 +268,10 @@ public final class HokePool {
 		} catch (Exception e) {
 			e.printStackTrace();
 			LOGGER.error("Hoke flush pool failed: ", e);
+		} finally {
+			try {
+				POOL_LOCK.unlock();
+			} catch (Exception e2) {}
 		}
 	}
 
@@ -253,17 +282,31 @@ public final class HokePool {
 	 * TODO:如果数据量过多，flushPool线程会长时间持有POOL锁，导致这里删除巨慢，有待改进
 	 */
 	public static boolean removeHokeData(String poolKey){
-		synchronized (POOL) {
-			if(POOL.containsKey(poolKey)){
-				//#删除键值
-				POOL.remove(poolKey);
+		try {
+			if(POOL_LOCK.tryLock()){
+				if(POOL.containsKey(poolKey)){
+					//#删除键值
+					POOL.remove(poolKey);
+					return true;
+				}else{
+					return false;
+				}
 			}else{
 				return false;
 			}
+		} catch (Exception e) {
+			LOGGER.error("Hoke removeHokeData failed",e);
+			return false;
+		} finally {
+			try {
+				//#删除磁盘文件
+				HokeStorageHelper.deleteCacheFile(poolKey);
+			} catch (Exception e2) {}
+			
+			try {
+				POOL_LOCK.unlock();
+			} catch (Exception e2) {}
 		}
-		//#删除磁盘文件
-		HokeStorageHelper.deleteCacheFile(poolKey);
-		return true;
 	}
 	
 	public static String generatePoolKey(Method method, Object[] params) {
